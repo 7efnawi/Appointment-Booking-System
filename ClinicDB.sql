@@ -97,3 +97,43 @@ SELECT
     SUM(amount) AS Total_Revenue
 FROM Invoices
 GROUP BY Month, payment_method;
+
+-- ============================================
+-- ADDITIONAL TABLES FOR APP.PY
+-- ============================================
+
+-- Users Table (Authentication)
+CREATE TABLE IF NOT EXISTS Users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(64) NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    role ENUM('Admin', 'Doctor', 'Secretary') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Default Admin User (Password: admin123)
+INSERT IGNORE INTO Users (username, password_hash, full_name, role) VALUES
+('admin', SHA2('admin123', 256), 'System Administrator', 'Admin');
+
+-- Consultations Table (Medical Records)
+CREATE TABLE IF NOT EXISTS Consultations (
+    consultation_id INT AUTO_INCREMENT PRIMARY KEY,
+    appointment_id INT NOT NULL,
+    symptoms TEXT,
+    diagnosis TEXT,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (appointment_id) REFERENCES Appointments(appointment_id) ON DELETE CASCADE
+);
+
+-- Prescriptions Table
+CREATE TABLE IF NOT EXISTS Prescriptions (
+    prescription_id INT AUTO_INCREMENT PRIMARY KEY,
+    consultation_id INT NOT NULL,
+    medication_name VARCHAR(255),
+    dosage VARCHAR(100),
+    duration VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (consultation_id) REFERENCES Consultations(consultation_id) ON DELETE CASCADE
+);
